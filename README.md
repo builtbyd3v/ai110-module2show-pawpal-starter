@@ -47,11 +47,19 @@ pip install -r requirements.txt
 Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
 
 ```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
+Today's Schedule
+-----------------
+08:00 - 08:30 | Mochi: Morning walk (30 min, high, daily)
+08:30 - 08:40 | Mochi: Breakfast (10 min, high, daily)
+08:40 - 08:55 | Bean: Litter box check (15 min, medium, daily)
+08:55 - 09:15 | Bean: Play session (20 min, low, daily)
+
+Why this plan was chosen
+-------------------------
+- Mochi's Morning walk was included because it is high priority and fits in the available time.
+- Mochi's Breakfast was included because it is high priority and fits in the available time.
+- Bean's Litter box check was included because it is medium priority and fits in the available time.
+- Bean's Play session was included because it is low priority and fits in the available time.
 ```
 
 ## 🧪 Testing PawPal+
@@ -72,23 +80,23 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
+The scheduler groups tasks from all of the owner's pets, sorts them by priority, keeps them inside the available time window, and explains why each task made it into the plan.
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | `Scheduler.sort_tasks()` | Sorts by priority, preferred time, duration, pet name, and description. |
+| Filtering | `Scheduler.build_daily_schedule()` | Skips completed tasks and tasks that do not fit in the available time. |
+| Conflict handling | `Scheduler.build_daily_schedule()` | Lays tasks out sequentially so the printed schedule does not overlap. |
+| Recurring tasks | `Task.frequency` | Tracks whether a task is daily, weekly, or some other repeat pattern. |
 
 ## 📸 Demo Walkthrough
 
 Describe your app in numbered steps so a reader can follow along without watching a video:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. Run `python main.py` to create a sample owner, two pets, and several care tasks.
+2. Review the printed schedule in the terminal to see how the tasks were ordered.
+3. Look at the explanation lines to understand why each task was selected.
+4. Run `python -m pytest` to confirm the task status and task-adding behaviors still work.
+5. Use the output as a reference when you connect the logic layer to the Streamlit UI.
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

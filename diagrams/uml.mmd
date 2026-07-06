@@ -5,6 +5,7 @@ classDiagram
         +Pet[] pets
         +add_pet(pet) void
         +update_preferences(preferences) void
+        +get_all_tasks() tuple[]
     }
 
     class Pet {
@@ -17,23 +18,25 @@ classDiagram
     }
 
     class Task {
-        +str title
+        +str description
         +int duration_minutes
         +str priority
+        +str time_of_day
         +str category
-        +bool recurring
+        +str frequency
+        +bool completed
+        +mark_complete() void
     }
 
     class Scheduler {
         +PetOwner owner
-        +Pet pet
         +int available_minutes
-        +build_daily_plan() Task[]
-        +sort_tasks(tasks) Task[]
+        +str start_time
+        +build_daily_schedule() dict[]
+        +sort_tasks(tasks) tuple[]
         +explain_plan(tasks) str[]
     }
 
     PetOwner "1" o-- "many" Pet : owns
     Pet "1" o-- "many" Task : has
-    Scheduler --> Pet : plans for
     Scheduler --> PetOwner : plans for
