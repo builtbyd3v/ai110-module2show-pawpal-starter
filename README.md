@@ -102,6 +102,14 @@ Bean: Vet reminder (08:30, 5 min, low)
 
 ## 🧪 Testing PawPal+
 
+The current test suite covers the most important behaviors in the logic layer:
+- Task completion updates status correctly.
+- Adding tasks increases a pet's task list.
+- Time sorting returns tasks in chronological order.
+- Filtering can target a single pet.
+- Recurring daily tasks create a next occurrence after scheduling.
+- Conflict detection flags overlapping task windows.
+
 ```bash
 # Run the full test suite:
 pytest
@@ -113,8 +121,18 @@ pytest --cov
 Sample test output:
 
 ```
-# Paste your pytest output here
+============================= test session starts =============================
+platform win32 -- Python 3.14.6, pytest-9.1.1, pluggy-1.6.0
+rootdir: D:\CodePath\AI110\ai110-module2show-pawpal-starter
+plugins: anyio-4.14.0
+collected 7 items
+
+tests\test_pawpal.py .......                                             [100%]
+
+============================== 7 passed in 0.02s ==============================
 ```
+
+Confidence Level: 4/5. The suite gives good coverage of the main scheduling behaviors and the Streamlit app now has a working logic layer, but I would still add a few more edge-case tests for empty schedules and longer multi-day planning.
 
 ## 📐 Smarter Scheduling
 
