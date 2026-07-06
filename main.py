@@ -1,25 +1,79 @@
 from pathlib import Path
 
+from tabulate import tabulate
+
 from pawpal_system import Pet, PetOwner, Scheduler, Task, load_from_json, save_to_json
+
+# ANSI color codes for terminal output
+COLOR_RESET = "\033[0m"
+COLOR_BOLD = "\033[1m"
+COLOR_GREEN = "\033[92m"
+COLOR_YELLOW = "\033[93m"
+COLOR_RED = "\033[91m"
+COLOR_BLUE = "\033[94m"
+COLOR_CYAN = "\033[96m"
+
+# Emoji for task types
+EMOJI_WALK = "🚶"
+EMOJI_FOOD = "🍽️"
+EMOJI_CLEAN = "🧹"
+EMOJI_PLAY = "🎾"
+EMOJI_HEALTH = "🏥"
+EMOJI_HIGH = "🔴"
+EMOJI_MEDIUM = "🟡"
+EMOJI_LOW = "🟢"
+EMOJI_CHECK = "✅"
+EMOJI_CONFLICT = "⚠️"
+
+
+def get_priority_emoji(priority: str) -> str:
+    """Return emoji for priority level."""
+    if priority.lower() == "high":
+        return EMOJI_HIGH
+    elif priority.lower() == "medium":
+        return EMOJI_MEDIUM
+    else:
+        return EMOJI_LOW
+
+
+def get_task_emoji(description: str) -> str:
+    """Return emoji based on task description."""
+    desc_lower = description.lower()
+    if "walk" in desc_lower:
+        return EMOJI_WALK
+    elif "breakfast" in desc_lower or "feed" in desc_lower or "food" in desc_lower:
+        return EMOJI_FOOD
+    elif "clean" in desc_lower or "litter" in desc_lower:
+        return EMOJI_CLEAN
+    elif "play" in desc_lower or "enrichment" in desc_lower:
+        return EMOJI_PLAY
+    elif "vet" in desc_lower or "health" in desc_lower or "med" in desc_lower:
+        return EMOJI_HEALTH
+    return "📋"
 
 
 def format_schedule_line(item: dict[str, str | int]) -> str:
     """Format one schedule item for terminal output."""
-
+    priority_emoji = get_priority_emoji(str(item["priority"]))
+    task_emoji = get_task_emoji(str(item["task_description"]))
     return (
         f"{item['start_time']} - {item['end_time']} | "
-        f"{item['pet_name']}: {item['task_description']} "
-        f"({item['duration_minutes']} min, {item['priority']}, {item['frequency']})"
+        f"{task_emoji} {item['pet_name']}: {item['task_description']} "
+        f"{priority_emoji} ({item['duration_minutes']} min, {item['frequency']})"
     )
 
 
 def format_task_label(pet: Pet, task: Task) -> str:
     """Format one task for the terminal demo."""
-
-    return (
-        f"{pet.name}: {task.description} "
-        f"({task.time_of_day or 'no time'}, {task.duration_minutes} min, {task.priority})"
-    )
+    priority_emoji = get_priority_emoji(task.priority)
+    task_emoji = get_task_emoji(task.description)
+    return [
+        f"{task_emoji} {pet.name}",
+        task.description,
+        task.time_of_day or "—",
+        f"{task.duration_minutes} min",
+        f"{priority_emoji} {task.priority}",
+    ]
 
 
 def main() -> None:
@@ -51,53 +105,48 @@ def main() -> None:
     schedule = scheduler.build_daily_schedule()
     explanations = scheduler.explain_plan(schedule)
 
-    print("Unsorted task list")
-    print("------------------")
-    for pet, task in raw_tasks:
-        print(format_task_label(pet, task))
+    print(f"\n{COLOR_BOLD}{COLOR_BLUE}Unsorted task list{COLOR_RESET}")
+    print(COLOR_BLUE + "—" * 40 + COLOR_RESET)
+    raw_table = [format_task_label(pet, task) for pet, task in raw_tasks]
+    print(tabulate(raw_table, headers=["Pet", "Description", "Time", "Duration", "Priority"], tablefmt="grid"))
 
-    print()
-    print("Sorted by time")
-    print("--------------")
-    for pet, task in sorted_by_time:
-        print(format_task_label(pet, task))
+    print(f"\n{COLOR_BOLD}{COLOR_CYAN}Sorted by time{COLOR_RESET}")
+    print(COLOR_CYAN + "—" * 40 + COLOR_RESET)
+    sorted_table = [format_task_label(pet, task) for pet, task in sorted_by_time]
+    print(tabulate(sorted_table, headers=["Pet", "Description", "Time", "Duration", "Priority"], tablefmt="grid"))
 
-    print()
-    print("Filtered for Mochi")
-    print("-------------------")
-    for pet, task in filtered_for_mochi:
-        print(format_task_label(pet, task))
+    print(f"\n{COLOR_BOLD}{COLOR_CYAN}Filtered for Mochi{COLOR_RESET}")
+    print(COLOR_CYAN + "—" * 40 + COLOR_RESET)
+    filtered_table = [format_task_label(pet, task) for pet, task in filtered_for_mochi]
+    print(tabulate(filtered_table, headers=["Pet", "Description", "Time", "Duration", "Priority"], tablefmt="grid"))
 
-    print()
-    print("Conflict warnings")
-    print("-----------------")
+    print(f"\n{COLOR_BOLD}{COLOR_YELLOW}Conflict warnings{COLOR_RESET}")
+    print(COLOR_YELLOW + "—" * 40 + COLOR_RESET)
     if conflict_warnings:
         for warning in conflict_warnings:
-            print(f"- {warning}")
+            print(f"{EMOJI_CONFLICT} {COLOR_RED}{warning}{COLOR_RESET}")
     else:
-        print("- No conflicts found.")
+        print(f"{COLOR_GREEN}{EMOJI_CHECK} No conflicts found.{COLOR_RESET}")
 
-    print()
-    print("Today's Schedule")
-    print("-----------------")
+    print(f"\n{COLOR_BOLD}{COLOR_GREEN}Today's Schedule{COLOR_RESET}")
+    print(COLOR_GREEN + "—" * 40 + COLOR_RESET)
     for item in schedule:
         print(format_schedule_line(item))
 
-    print()
-    print("Why this plan was chosen")
-    print("-------------------------")
-    for explanation in explanations:
-        print(f"- {explanation}")
+    print(f"\n{COLOR_BOLD}{COLOR_YELLOW}Why this plan was chosen{COLOR_RESET}")
+    print(COLOR_YELLOW + "—" * 40 + COLOR_RESET)
+    for i, explanation in enumerate(explanations, 1):
+        print(f"{i}. {explanation}")
 
-    print()
-    print("Recurring tasks after scheduling")
-    print("-------------------------------")
+    print(f"\n{COLOR_BOLD}{COLOR_CYAN}Recurring tasks after scheduling{COLOR_RESET}")
+    print(COLOR_CYAN + "—" * 40 + COLOR_RESET)
+    recurring_table = []
     for pet in owner.pets:
         for task in pet.tasks:
-            print(format_task_label(pet, task))
+            recurring_table.append(format_task_label(pet, task))
+    print(tabulate(recurring_table, headers=["Pet", "Description", "Time", "Duration", "Priority"], tablefmt="grid"))
 
-    print()
-    print(f"Saved and reloaded data from: {data_path}")
+    print(f"\n{COLOR_GREEN}{EMOJI_CHECK} Saved and reloaded data from: {data_path}{COLOR_RESET}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,65 @@
+{
+  "name": "Jordan",
+  "preferences": [],
+  "pets": [
+    {
+      "name": "Mochi",
+      "species": "dog",
+      "age": 5,
+      "tasks": [
+        {
+          "description": "Morning walk",
+          "duration_minutes": 30,
+          "priority": "high",
+          "time_of_day": "08:00",
+          "category": "general",
+          "frequency": "daily",
+          "completed": false
+        },
+        {
+          "description": "Breakfast",
+          "duration_minutes": 10,
+          "priority": "high",
+          "time_of_day": "08:30",
+          "category": "general",
+          "frequency": "daily",
+          "completed": false
+        }
+      ]
+    },
+    {
+      "name": "Bean",
+      "species": "cat",
+      "age": 3,
+      "tasks": [
+        {
+          "description": "Litter box check",
+          "duration_minutes": 15,
+          "priority": "medium",
+          "time_of_day": "08:25",
+          "category": "general",
+          "frequency": "daily",
+          "completed": false
+        },
+        {
+          "description": "Play session",
+          "duration_minutes": 20,
+          "priority": "low",
+          "time_of_day": "10:00",
+          "category": "general",
+          "frequency": "daily",
+          "completed": false
+        },
+        {
+          "description": "Vet reminder",
+          "duration_minutes": 5,
+          "priority": "low",
+          "time_of_day": "08:30",
+          "category": "general",
+          "frequency": "weekly",
+          "completed": false
+        }
+      ]
+    }
+  ]
+}

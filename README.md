@@ -165,6 +165,26 @@ The scheduler groups tasks from all of the owner's pets, sorts them by time and 
 | Conflict handling | `Scheduler.detect_conflicts()` | Returns warnings when task time windows overlap instead of stopping the program. |
 | Recurring tasks | `Task.frequency` / `Task.next_occurrence()` | Copies daily and weekly tasks forward after completion so the next occurrence stays in the task list. |
 
+## 🎨 Professional UI and Output Formatting
+
+The CLI demo and Streamlit app both use professional formatting for better readability:
+
+**CLI Output Formatting:**
+- **Tabulate** (`tabulate >= 0.9.0`): Renders data tables with grid formatting for organized display.
+- **ANSI Colors**: Color-coded output (blue for sorted tasks, cyan for filtered tasks, yellow for warnings, green for success).
+- **Emoji Indicators**: Task type emoji (🚶 walks, 🍽️ food, 🧹 cleaning, 🎾 play, 🏥 health) and priority indicators (🔴 high, 🟡 medium, 🟢 low).
+- **Headers and Separators**: Bold headers with color-matched separator lines for visual hierarchy.
+
+**Streamlit UI Formatting:**
+- `st.table()`: Renders task lists, schedules, and filtered results in structured tables.
+- `st.success()`: Green confirmation messages for successful operations.
+- `st.warning()`: Yellow alerts for task conflicts and potential issues.
+- `st.error()`: Red error messages for validation failures.
+
+Files using formatting libraries:
+- [main.py](main.py): Uses `tabulate` and ANSI codes for terminal output.
+- [app.py](app.py): Uses Streamlit built-in formatting components.
+
 ## 📸 Demo Walkthrough
 
 Describe your app in numbered steps so a reader can follow along without watching a video:
