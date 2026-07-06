@@ -1,4 +1,6 @@
-from pawpal_system import Pet, PetOwner, Scheduler, Task
+from pathlib import Path
+
+from pawpal_system import Pet, PetOwner, Scheduler, Task, load_from_json, save_to_json
 
 
 def format_schedule_line(item: dict[str, str | int]) -> str:
@@ -35,6 +37,10 @@ def main() -> None:
 
     owner.add_pet(dog)
     owner.add_pet(cat)
+
+    data_path = Path("pawpal_data.json")
+    save_to_json(owner, data_path)
+    owner = load_from_json(data_path)
 
     scheduler = Scheduler(owner=owner, available_minutes=120, start_time="08:00")
 
@@ -89,6 +95,9 @@ def main() -> None:
     for pet in owner.pets:
         for task in pet.tasks:
             print(format_task_label(pet, task))
+
+    print()
+    print(f"Saved and reloaded data from: {data_path}")
 
 
 if __name__ == "__main__":

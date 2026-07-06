@@ -110,6 +110,15 @@ The current test suite covers the most important behaviors in the logic layer:
 - Recurring daily tasks create a next occurrence after scheduling.
 - Conflict detection flags overlapping task windows.
 
+### Persistence Workflow
+
+PawPal+ can save and reload the owner tree through JSON using `save_to_json()` and `load_from_json()` in [pawpal_system.py](pawpal_system.py). The JSON file stores the owner, pets, and tasks as plain dictionaries so the Streamlit app or a CLI script can restore the same data on the next run.
+
+Files updated for persistence:
+- [pawpal_system.py](pawpal_system.py)
+- [main.py](main.py)
+- [README.md](README.md)
+
 ```bash
 # Run the full test suite:
 pytest
@@ -133,6 +142,17 @@ tests\test_pawpal.py .......                                             [100%]
 ```
 
 Confidence Level: 4/5. The suite gives good coverage of the main scheduling behaviors and the Streamlit app now has a working logic layer, but I would still add a few more edge-case tests for empty schedules and longer multi-day planning.
+
+## 📦 Persistence Details
+
+The current persistence flow is:
+
+1. Build a `PetOwner` object in memory.
+2. Call `save_to_json()` to write the owner tree to `pawpal_data.json`.
+3. Call `load_from_json()` to restore the same owner, pets, and tasks.
+4. Use the restored object in the scheduler or Streamlit UI.
+
+This keeps serialization outside the UI while preserving the object model used by the scheduler.
 
 ## 📐 Smarter Scheduling
 

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import List, Optional
 
 
@@ -44,6 +46,33 @@ class Task:
             )
         return None
 
+    def to_dict(self) -> dict[str, str | int | bool | None]:
+        """Convert the task into JSON-friendly data."""
+
+        return {
+            "description": self.description,
+            "duration_minutes": self.duration_minutes,
+            "priority": self.priority,
+            "time_of_day": self.time_of_day,
+            "category": self.category,
+            "frequency": self.frequency,
+            "completed": self.completed,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, str | int | bool | None]) -> Task:
+        """Build a task from JSON-friendly data."""
+
+        return cls(
+            description=str(data.get("description", "Untitled task")),
+            duration_minutes=int(data.get("duration_minutes", 0)),
+            priority=str(data.get("priority", "low")),
+            time_of_day=data.get("time_of_day") if data.get("time_of_day") is not None else None,
+            category=str(data.get("category", "general")),
+            frequency=str(data.get("frequency", "daily")),
+            completed=bool(data.get("completed", False)),
+        )
+
 
 @dataclass
 class Pet:
@@ -68,6 +97,30 @@ class Pet:
         """Return a copy of this pet's tasks."""
 
         return list(self.tasks)
+
+    def to_dict(self) -> dict[str, str | int | list[dict[str, str | int | bool | None]] | None]:
+        """Convert the pet into JSON-friendly data."""
+
+        return {
+            "name": self.name,
+            "species": self.species,
+            "age": self.age,
+            "tasks": [task.to_dict() for task in self.tasks],
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, object]) -> Pet:
+        """Build a pet from JSON-friendly data."""
+
+        pet = cls(
+            name=str(data.get("name", "Unnamed pet")),
+            species=str(data.get("species", "other")),
+            age=data.get("age") if isinstance(data.get("age"), int) else None,
+        )
+        for task_data in data.get("tasks", []):
+            if isinstance(task_data, dict):
+                pet.add_task(Task.from_dict(task_data))
+        return pet
 
 
 @dataclass
@@ -105,6 +158,30 @@ class PetOwner:
                 return pet.get_tasks()
         return []
 
+    def to_dict(self) -> dict[str, object]:
+        """Convert the owner tree into JSON-friendly data."""
+
+        return {
+            "name": self.name,
+            "preferences": list(self.preferences),
+            "pets": [pet.to_dict() for pet in self.pets],
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, object]) -> PetOwner:
+        """Build an owner tree from JSON-friendly data."""
+
+        owner = cls(name=str(data.get("name", "Jordan")))
+        preferences = data.get("preferences", [])
+        if isinstance(preferences, list):
+            owner.preferences = [str(item) for item in preferences]
+        pets = data.get("pets", [])
+        if isinstance(pets, list):
+            for pet_data in pets:
+                if isinstance(pet_data, dict):
+                    owner.add_pet(Pet.from_dict(pet_data))
+        return owner
+
 
 @dataclass
 class Scheduler:
@@ -128,6 +205,31 @@ class Scheduler:
         hours = (total_minutes // 60) % 24
         minutes = total_minutes % 60
         return f"{hours:02d}:{minutes:02d}"
+
+    def find_next_available_slot(
+        self,
+        scheduled_tasks: List[dict[str, str | int]],
+        duration_minutes: int,
+        preferred_time: Optional[str] = None,
+    ) -> Optional[str]:
+        """Find the next open start time for a task."""
+
+        start_minutes = self._time_to_minutes(preferred_time or self.start_time)
+        current_minutes = start_minutes
+
+        ordered_schedule = sorted(scheduled_tasks, key=lambda item: str(item["start_time"]))
+        for item in ordered_schedule:
+            item_start = self._time_to_minutes(str(item["start_time"]))
+            item_end = self._time_to_minutes(str(item["end_time"]))
+
+            if current_minutes + duration_minutes <= item_start:
+                return self._minutes_to_time(current_minutes)
+            if current_minutes < item_end:
+                current_minutes = item_end
+
+        if current_minutes + duration_minutes <= self._time_to_minutes("23:59"):
+            return self._minutes_to_time(current_minutes)
+        return None
 
     def sort_by_time(self, tasks: List[tuple[Pet, Task]]) -> List[tuple[Pet, Task]]:
         """Sort tasks by their preferred time, then by priority."""
@@ -211,6 +313,9 @@ class Scheduler:
                 continue
 
             start_minutes = current_minutes + minutes_used
+            next_slot = self.find_next_available_slot(scheduled_tasks, task.duration_minutes, task.time_of_day)
+            if next_slot is not None:
+                start_minutes = self._time_to_minutes(next_slot)
             end_minutes = start_minutes + task.duration_minutes
             scheduled_tasks.append(
                 {
@@ -245,3 +350,20 @@ class Scheduler:
                 f"{item['pet_name']}'s {item['task_description']} was included because it is {item['priority']} priority and fits in the available time."
             )
         return explanations
+
+
+def save_to_json(owner: PetOwner, file_path: str | Path) -> None:
+    """Save the current owner tree to disk as JSON."""
+
+    path = Path(file_path)
+    path.write_text(json.dumps(owner.to_dict(), indent=2), encoding="utf-8")
+
+
+def load_from_json(file_path: str | Path) -> PetOwner:
+    """Load an owner tree from a JSON file."""
+
+    path = Path(file_path)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("Invalid PawPal+ JSON data")
+    return PetOwner.from_dict(data)
