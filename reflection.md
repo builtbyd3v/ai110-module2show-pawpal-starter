@@ -27,13 +27,13 @@
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+- The scheduler considers time of day, priority, pet ownership, whether a task is already completed, and whether a task repeats daily or weekly.
+- I treated time and priority as the main constraints because they control what actually fits into a short daily schedule, while pet name and completion status help narrow the task list.
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+- One tradeoff is that conflict detection is lightweight: it warns about overlapping time windows instead of trying to fully resolve every possible clash automatically.
+- That is reasonable here because the project is a planner first, so surfacing the problem clearly is more useful than silently changing the user's intended task order.
 
 ---
 
@@ -41,13 +41,13 @@
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+- I used AI to help turn the UML idea into concrete Python classes, to draft small scheduling methods, and to tighten the Streamlit wiring and docs.
+- The most helpful prompts were the ones that named a specific file and a specific behavior, like asking how to sort tasks by time, filter by pet, or keep task state in `st.session_state`.
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+- I did not accept the first scheduling draft as-is because it was too shallow for the assignment.
+- I verified the final behavior by running the demo script, checking the terminal output for ordering and conflict warnings, and running `pytest` on the task and scheduler behaviors.
 
 ---
 
@@ -55,13 +55,13 @@
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+- I tested task completion, task addition, sorting by time, filtering by pet name, recurring task rollover, and conflict detection.
+- These tests mattered because they covered the core logic that the UI depends on and made sure the planner still behaved correctly after the scheduling changes.
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+- I am moderately confident in the current scheduler because the main workflow is covered by a demo run and automated tests.
+- If I had more time, I would test edge cases like empty schedules, multiple tasks with the same start time, and longer recurring sequences across several days.
 
 ---
 
@@ -69,12 +69,12 @@
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+- I am most satisfied that the UI, logic layer, and documentation now match each other instead of feeling like separate pieces.
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+- In another iteration, I would improve the conflict resolution so the scheduler can suggest alternate times instead of only warning about overlaps.
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+- I learned that a small, well-tested model with clear responsibilities is much easier to extend than a single large planning function.

@@ -21,6 +21,29 @@ class Task:
 
         self.completed = True
 
+    def next_occurrence(self) -> Optional[Task]:
+        """Return the next repeating instance for daily or weekly tasks."""
+
+        if self.frequency == "daily":
+            return Task(
+                description=self.description,
+                duration_minutes=self.duration_minutes,
+                priority=self.priority,
+                time_of_day=self.time_of_day,
+                category=self.category,
+                frequency=self.frequency,
+            )
+        if self.frequency == "weekly":
+            return Task(
+                description=self.description,
+                duration_minutes=self.duration_minutes,
+                priority=self.priority,
+                time_of_day=self.time_of_day,
+                category=self.category,
+                frequency=self.frequency,
+            )
+        return None
+
 
 @dataclass
 class Pet:
@@ -35,6 +58,11 @@ class Pet:
         """Add a task to this pet."""
 
         self.tasks.append(task)
+
+    def remove_completed_tasks(self) -> None:
+        """Remove completed tasks after they have been handled."""
+
+        self.tasks = [task for task in self.tasks if not task.completed]
 
     def get_tasks(self) -> List[Task]:
         """Return a copy of this pet's tasks."""
@@ -69,6 +97,14 @@ class PetOwner:
                 all_tasks.append((pet, task))
         return all_tasks
 
+    def get_tasks_for_pet(self, pet_name: str) -> List[Task]:
+        """Return tasks for a single pet by name."""
+
+        for pet in self.pets:
+            if pet.name == pet_name:
+                return pet.get_tasks()
+        return []
+
 
 @dataclass
 class Scheduler:
@@ -93,6 +129,32 @@ class Scheduler:
         minutes = total_minutes % 60
         return f"{hours:02d}:{minutes:02d}"
 
+    def sort_by_time(self, tasks: List[tuple[Pet, Task]]) -> List[tuple[Pet, Task]]:
+        """Sort tasks by their preferred time, then by priority."""
+
+        def sort_key(item: tuple[Pet, Task]) -> tuple[str, int, str, str]:
+            pet, task = item
+            preferred_time = task.time_of_day or "23:59"
+            priority_rank = self._priority_order.get(task.priority.lower(), 99)
+            return (preferred_time, priority_rank, pet.name.lower(), task.description.lower())
+
+        return sorted(tasks, key=sort_key)
+
+    def filter_tasks(
+        self,
+        tasks: List[tuple[Pet, Task]],
+        pet_name: Optional[str] = None,
+        completed: Optional[bool] = None,
+    ) -> List[tuple[Pet, Task]]:
+        """Filter tasks by pet name or completion status."""
+
+        filtered_tasks = tasks
+        if pet_name is not None:
+            filtered_tasks = [item for item in filtered_tasks if item[0].name == pet_name]
+        if completed is not None:
+            filtered_tasks = [item for item in filtered_tasks if item[1].completed == completed]
+        return filtered_tasks
+
     def sort_tasks(self, tasks: List[tuple[Pet, Task]]) -> List[tuple[Pet, Task]]:
         """Sort tasks by priority, preferred time, and duration."""
 
@@ -110,6 +172,31 @@ class Scheduler:
 
         return sorted(tasks, key=sort_key)
 
+    def detect_conflicts(self, tasks: List[tuple[Pet, Task]]) -> List[str]:
+        """Warn when two tasks overlap at the same preferred time."""
+
+        warnings: List[str] = []
+        sorted_tasks = self.sort_by_time(tasks)
+
+        for index, (left_pet, left_task) in enumerate(sorted_tasks):
+            if left_task.time_of_day is None:
+                continue
+            left_start = self._time_to_minutes(left_task.time_of_day)
+            left_end = left_start + left_task.duration_minutes
+
+            for right_pet, right_task in sorted_tasks[index + 1 :]:
+                if right_task.time_of_day is None:
+                    continue
+                right_start = self._time_to_minutes(right_task.time_of_day)
+                right_end = right_start + right_task.duration_minutes
+
+                if right_start < left_end and left_start < right_end:
+                    warnings.append(
+                        f"Conflict: {left_pet.name}'s {left_task.description} overlaps with {right_pet.name}'s {right_task.description}."
+                    )
+
+        return warnings
+
     def build_daily_schedule(self) -> List[dict[str, str | int]]:
         """Build a schedule from all unfinished tasks that fit the time window."""
 
@@ -117,9 +204,9 @@ class Scheduler:
         minutes_used = 0
         current_minutes = self._time_to_minutes(self.start_time)
 
-        for pet, task in self.sort_tasks([
-            item for item in self.owner.get_all_tasks() if not item[1].completed
-        ]):
+        eligible_tasks = self.filter_tasks(self.owner.get_all_tasks(), completed=False)
+
+        for pet, task in self.sort_tasks(eligible_tasks):
             if minutes_used + task.duration_minutes > self.available_minutes:
                 continue
 
@@ -137,6 +224,12 @@ class Scheduler:
                 }
             )
             minutes_used += task.duration_minutes
+
+            task.mark_complete()
+            recurring_task = task.next_occurrence()
+            if recurring_task is not None:
+                pet.add_task(recurring_task)
+            pet.remove_completed_tasks()
 
         return scheduled_tasks
 

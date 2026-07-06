@@ -47,19 +47,57 @@ pip install -r requirements.txt
 Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
 
 ```
+Unsorted task list
+------------------
+Mochi: Morning walk (08:00, 30 min, high)
+Mochi: Breakfast (08:30, 10 min, high)
+Bean: Litter box check (08:25, 15 min, medium)
+Bean: Play session (10:00, 20 min, low)
+Bean: Vet reminder (08:30, 5 min, low)
+
+Sorted by time
+--------------
+Mochi: Morning walk (08:00, 30 min, high)
+Bean: Litter box check (08:25, 15 min, medium)
+Mochi: Breakfast (08:30, 10 min, high)
+Bean: Vet reminder (08:30, 5 min, low)
+Bean: Play session (10:00, 20 min, low)
+
+Filtered for Mochi
+-------------------
+Mochi: Morning walk (08:00, 30 min, high)
+Mochi: Breakfast (08:30, 10 min, high)
+
+Conflict warnings
+-----------------
+- Conflict: Mochi's Morning walk overlaps with Bean's Litter box check.
+- Conflict: Bean's Litter box check overlaps with Mochi's Breakfast.
+- Conflict: Bean's Litter box check overlaps with Bean's Vet reminder.
+- Conflict: Mochi's Breakfast overlaps with Bean's Vet reminder.
+
 Today's Schedule
 -----------------
 08:00 - 08:30 | Mochi: Morning walk (30 min, high, daily)
 08:30 - 08:40 | Mochi: Breakfast (10 min, high, daily)
 08:40 - 08:55 | Bean: Litter box check (15 min, medium, daily)
-08:55 - 09:15 | Bean: Play session (20 min, low, daily)
+08:55 - 09:00 | Bean: Vet reminder (5 min, low, weekly)
+09:00 - 09:20 | Bean: Play session (20 min, low, daily)
 
 Why this plan was chosen
 -------------------------
 - Mochi's Morning walk was included because it is high priority and fits in the available time.
 - Mochi's Breakfast was included because it is high priority and fits in the available time.
 - Bean's Litter box check was included because it is medium priority and fits in the available time.
+- Bean's Vet reminder was included because it is low priority and fits in the available time.
 - Bean's Play session was included because it is low priority and fits in the available time.
+
+Recurring tasks after scheduling
+--------------------------------
+Mochi: Morning walk (08:00, 30 min, high)
+Mochi: Breakfast (08:30, 10 min, high)
+Bean: Litter box check (08:25, 15 min, medium)
+Bean: Play session (10:00, 20 min, low)
+Bean: Vet reminder (08:30, 5 min, low)
 ```
 
 ## 🧪 Testing PawPal+
@@ -80,14 +118,14 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-The scheduler groups tasks from all of the owner's pets, sorts them by priority, keeps them inside the available time window, and explains why each task made it into the plan.
+The scheduler groups tasks from all of the owner's pets, sorts them by time and priority, filters by pet or completion state, checks for conflicts, keeps tasks inside the available time window, and explains why each task made it into the plan.
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | `Scheduler.sort_tasks()` | Sorts by priority, preferred time, duration, pet name, and description. |
-| Filtering | `Scheduler.build_daily_schedule()` | Skips completed tasks and tasks that do not fit in the available time. |
-| Conflict handling | `Scheduler.build_daily_schedule()` | Lays tasks out sequentially so the printed schedule does not overlap. |
-| Recurring tasks | `Task.frequency` | Tracks whether a task is daily, weekly, or some other repeat pattern. |
+| Task sorting | `Scheduler.sort_by_time()` / `Scheduler.sort_tasks()` | `sort_by_time()` orders tasks by preferred time; `sort_tasks()` keeps the priority-aware ordering for the final schedule. |
+| Filtering | `Scheduler.filter_tasks()` / `Scheduler.build_daily_schedule()` | Filters by pet name or completion status and skips tasks that do not fit in the available time. |
+| Conflict handling | `Scheduler.detect_conflicts()` | Returns warnings when task time windows overlap instead of stopping the program. |
+| Recurring tasks | `Task.frequency` / `Task.next_occurrence()` | Copies daily and weekly tasks forward after completion so the next occurrence stays in the task list. |
 
 ## 📸 Demo Walkthrough
 
