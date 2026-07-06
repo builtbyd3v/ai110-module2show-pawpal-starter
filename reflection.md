@@ -4,13 +4,22 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+- My initial UML design uses four classes: `PetOwner`, `Pet`, `Task`, and `Scheduler`.
+- `PetOwner` stores the owner's name and care preferences, `Pet` stores the pet's basic information, `Task` stores each care task's title, duration, and priority, and `Scheduler` turns the tasks into a daily plan.
+- This keeps the data classes separate from the planning logic, which makes the system easier to explain and easier to change later.
+
+**Step 2: Building blocks**
+
+- `PetOwner` holds the owner's name, preferences, and pets; it can add pets and update preferences.
+- `Pet` holds the pet's name, species, age, and tasks; it can add tasks and return the current list of tasks.
+- `Task` holds the task title, duration, priority, category, and whether it repeats; it represents one care activity that may be scheduled.
+- `Scheduler` holds the owner, the pet being planned for, the available time, and the plan-making behavior; it can sort tasks, build a schedule, and explain the result.
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+- Yes. I first thought about using one planning class, but I separated the data model from the scheduling behavior after reviewing the app flow.
+- I also adjusted the scheduler so it explicitly knows which pet it is planning for instead of only holding owner-level data.
+- That change made the design more modular and better matched the Streamlit starter app.
 
 ---
 
