@@ -43,11 +43,13 @@
 
 - I used AI to help turn the UML idea into concrete Python classes, to draft small scheduling methods, and to tighten the Streamlit wiring and docs.
 - The most helpful prompts were the ones that named a specific file and a specific behavior, like asking how to sort tasks by time, filter by pet, or keep task state in `st.session_state`.
+- Using separate chat sessions by phase helped keep the design conversation, the scheduling implementation, and the UI polish work from bleeding into one another.
 
 **b. Judgment and verification**
 
 - I did not accept the first scheduling draft as-is because it was too shallow for the assignment.
 - I verified the final behavior by running the demo script, checking the terminal output for ordering and conflict warnings, and running `pytest` on the task and scheduler behaviors.
+- I also kept the final UML and README in sync with the code so the written deliverables matched the implementation rather than describing an older draft.
 
 ---
 

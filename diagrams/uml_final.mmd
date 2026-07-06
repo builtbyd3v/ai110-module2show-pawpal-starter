@@ -6,6 +6,7 @@ classDiagram
         +add_pet(pet) void
         +update_preferences(preferences) void
         +get_all_tasks() tuple[]
+        +get_tasks_for_pet(pet_name) Task[]
     }
 
     class Pet {
@@ -14,6 +15,7 @@ classDiagram
         +int age
         +Task[] tasks
         +add_task(task) void
+        +remove_completed_tasks() void
         +get_tasks() Task[]
     }
 
@@ -26,6 +28,7 @@ classDiagram
         +str frequency
         +bool completed
         +mark_complete() void
+        +next_occurrence() Task
     }
 
     class Scheduler {
@@ -35,8 +38,8 @@ classDiagram
         +sort_by_time(tasks) tuple[]
         +filter_tasks(tasks, pet_name, completed) tuple[]
         +detect_conflicts(tasks) str[]
-        +build_daily_schedule() dict[]
         +sort_tasks(tasks) tuple[]
+        +build_daily_schedule() dict[]
         +explain_plan(tasks) str[]
     }
 

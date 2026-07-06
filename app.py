@@ -15,6 +15,12 @@ def initialize_state() -> None:
         st.session_state.schedule = []
     if "schedule_explanations" not in st.session_state:
         st.session_state.schedule_explanations = []
+    if "sorted_tasks" not in st.session_state:
+        st.session_state.sorted_tasks = []
+    if "filtered_tasks" not in st.session_state:
+        st.session_state.filtered_tasks = []
+    if "conflict_warnings" not in st.session_state:
+        st.session_state.conflict_warnings = []
 
 
 def get_selected_pet() -> Pet | None:
@@ -182,10 +188,53 @@ start_time = st.text_input("Start time", value="08:00")
 
 if st.button("Generate schedule"):
     scheduler = Scheduler(owner=owner, available_minutes=available_minutes, start_time=start_time)
+    all_tasks = owner.get_all_tasks()
+    st.session_state.sorted_tasks = scheduler.sort_by_time(all_tasks)
+    st.session_state.filtered_tasks = scheduler.filter_tasks(
+        all_tasks,
+        pet_name=selected_pet.name if selected_pet is not None else None,
+    )
+    st.session_state.conflict_warnings = scheduler.detect_conflicts(all_tasks)
     schedule = scheduler.build_daily_schedule()
     explanations = scheduler.explain_plan(schedule)
     st.session_state.schedule = schedule
     st.session_state.schedule_explanations = explanations
+
+if st.session_state.sorted_tasks:
+    st.markdown("### Sorted Tasks")
+    st.table(
+        [
+            {
+                "pet": pet.name,
+                "description": task.description,
+                "time_of_day": task.time_of_day or "-",
+                "priority": task.priority,
+            }
+            for pet, task in st.session_state.sorted_tasks
+        ]
+    )
+
+if st.session_state.filtered_tasks:
+    st.markdown("### Tasks For Selected Pet")
+    st.table(
+        [
+            {
+                "pet": pet.name,
+                "description": task.description,
+                "time_of_day": task.time_of_day or "-",
+                "priority": task.priority,
+                "completed": task.completed,
+            }
+            for pet, task in st.session_state.filtered_tasks
+        ]
+    )
+
+if st.session_state.conflict_warnings:
+    for warning in st.session_state.conflict_warnings:
+        st.warning(warning)
+else:
+    if st.session_state.sorted_tasks:
+        st.success("No task conflicts detected for the selected data.")
 
 if st.session_state.schedule:
     st.markdown("### Today's Schedule")
@@ -200,6 +249,6 @@ st.divider()
 
 st.markdown(
     """
-**Checkpoint:** `app.py` now imports the logic layer, stores the owner in session state, adds pets and tasks into that memory, and generates a schedule from the stored data.
+**Checkpoint:** `app.py` now imports the logic layer, stores the owner in session state, adds pets and tasks into that memory, and surfaces sorted tasks, filtered tasks, conflict warnings, and the final schedule from the stored data.
 """
 )

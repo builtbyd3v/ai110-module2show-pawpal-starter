@@ -149,10 +149,10 @@ The scheduler groups tasks from all of the owner's pets, sorts them by time and 
 
 Describe your app in numbered steps so a reader can follow along without watching a video:
 
-1. Run `python main.py` to create a sample owner, two pets, and several care tasks.
-2. Review the printed schedule in the terminal to see how the tasks were ordered.
-3. Look at the explanation lines to understand why each task was selected.
-4. Run `python -m pytest` to confirm the task status and task-adding behaviors still work.
-5. Use the output as a reference when you connect the logic layer to the Streamlit UI.
+1. Open the Streamlit app and enter or update the owner information so the session has a real `PetOwner` object.
+2. Add one or more pets, then attach tasks with times, priorities, categories, and recurrence values.
+3. Click generate to view the sorted task table, the filtered tasks for the selected pet, and any conflict warnings.
+4. Review the final schedule table and the explanation lines to see how the scheduler handled time and priority.
+5. Run `python main.py` and `python -m pytest` to compare the terminal demo with the automated test coverage.
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
