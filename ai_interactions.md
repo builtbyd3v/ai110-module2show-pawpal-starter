@@ -28,7 +28,7 @@ I verified that the new persistence helpers matched the existing data model and 
 
 | | Option A | Option B |
 |-|----------|----------|
-| **Model / tool used** | | |
+| **Model / tool used** | GitHub Copilot | gpt 5.4 mini |
 | **Prompt** | Persistence + next-slot design prompt | Same task, framed as a minimal edge-layer approach |
 | **Response summary** | Keep persistence at the edges, add small dict conversion helpers, and keep next-slot logic inside `Scheduler`. | Same recommendation, with an explicit warning that slot-finding and persistence should not be pushed into `Pet` or `Task`. |
 | **What was useful** | It highlighted the simplest design that preserves the object model and keeps the scheduler readable. | It reinforced the same design and called out the tradeoff of mutating recurring tasks during scheduling. |
